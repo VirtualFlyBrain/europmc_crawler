@@ -17,7 +17,7 @@ docker run --volume=`pwd`/data:/data/ -e IDs_file=/data/IDs_file.txt -e output_f
 
 ## Local Run
 
-To run the code in your local install the following dependencies:
+To run the code in your local, install the following dependencies:
 
 ```
 sudo apt-get install libxml2-dev
