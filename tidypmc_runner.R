@@ -12,11 +12,11 @@ crawl_pmcid <- function(pmcid, output_folder) {
   metadata <- pmc_metadata(doc)
   write.table(metadata, file= paste(output_folder, pmcid, "_metadata.tsv", sep=""), quote=FALSE, sep='\t', col.names = NA)
   
-  tables <- pmc_table(doc)
-  write.table(tables, file= paste(output_folder, pmcid, "_tables.tsv", sep=""), quote=FALSE, sep='\t', col.names = NA)
-  
   captions <- pmc_caption(doc)
   write.table(captions, file= paste(output_folder, pmcid, "_captions.tsv", sep=""), quote=FALSE, sep='\t', col.names = NA)
+  
+  tables <- pmc_table(doc)
+  write.table(tables, file= paste(output_folder, pmcid, "_tables.tsv", sep=""), quote=FALSE, sep='\t', col.names = NA)
 }
 
 crawl_articles <- function(ids_filepath, output_folder) {
