@@ -1,7 +1,7 @@
 FROM r-base
 
-ENV IDs_file=/home/huseyin/R_workspace/IDs_file.txt
-ENV output_folder=/home/huseyin/R_workspace/europmc_crawler/results/
+ENV IDs_file=/home/huseyin/R_workspace2/europmc_crawler/data/output/PMC7710706.tsv
+ENV output_folder=/home/huseyin/R_workspace2/europmc_crawler/data/output/
 
 RUN apt-get update && \
     apt-get upgrade -y && \
