@@ -1,7 +1,7 @@
 FROM r-base
 
-ENV IDs_file=/home/huseyin/R_workspace2/europmc_crawler/data/output/PMC7710706.tsv
-ENV output_folder=/home/huseyin/R_workspace2/europmc_crawler/data/output/
+ENV FTP_folder=https://ftp.flybase.net/flybase/associated_files/vfb/
+ENV output_folder=/data/output2/
 
 RUN apt-get update && \
     apt-get upgrade -y && \
