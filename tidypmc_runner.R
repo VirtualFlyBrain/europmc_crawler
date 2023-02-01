@@ -3,13 +3,14 @@ library(tidyverse)
 library(europepmc)
 
 
-crawl_pmcid <- function(pmcid, output_folder) {
+crawl_pmcid <- function(pmcid, FBrf_ID, output_folder) {
   doc <- pmc_xml(pmcid)
   
   txt <- pmc_text(doc)
   write.table(txt, file= paste(output_folder, pmcid, ".tsv", sep=""), quote=FALSE, sep='\t', col.names = NA)
   
   metadata <- pmc_metadata(doc)
+  metadata['FBrf_ID'] <- c(FBrf_ID)
   write.table(metadata, file= paste(output_folder, pmcid, "_metadata.tsv", sep=""), quote=FALSE, sep='\t', col.names = NA)
   
   captions <- pmc_caption(doc)
@@ -31,7 +32,7 @@ crawl_articles <- function(ids_filepath, output_folder) {
       PMCID <- fields[2]
       tryCatch(
         {
-          crawl_pmcid(PMCID, output_folder)
+          crawl_pmcid(PMCID, FBrf_ID, output_folder)
         },
         error = function(e){
           message(paste0("Error occured during crawling: ", PMCID))
@@ -119,13 +120,13 @@ download_latest_ids_file <- function(ftp_folder, status_file, current_year, curr
 
 save_crawl_status <- function(crawling_status_file, year, month) {
   status_file<-file(crawling_status_file)
-  writeLines(c("## This file stores the latest data crawling status.", "# Latest crawl date:", paste(current_year, current_month, sep="-")), status_file)
+  writeLines(c("## This file stores the latest data crawling status.", "# Latest crawl date:", paste(year, month, sep="-")), status_file)
   close(status_file)
 }
 
 
 # Sys.setenv(FTP_folder = "https://ftp.flybase.net/flybase/associated_files/vfb/")
-# Sys.setenv(IDs_file = "/home/huseyin/R_workspace2/europmc_crawler/data/pmcid_new_vfb_fb_2022_06.tsv")
+# Sys.setenv(IDs_file = "/home/huseyin/R_workspace2/europmc_crawler/data/pmcid_new_vfb_fb_2022_06_short.tsv")
 # Sys.setenv(output_folder = "/home/huseyin/R_workspace2/europmc_crawler/data/output2/")
 
 today <- Sys.Date()

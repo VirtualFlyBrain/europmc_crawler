@@ -36,7 +36,7 @@ sudo apt-get install libcurl4-openssl-dev
 Enable the environment variable setting comment lines in the [tidypmc_runner.R](tidypmc_runner.R).
 
 ```R
-Sys.setenv(IDs_file = "/my/local/IDs_file.txt")
+Sys.setenv(IDs_file = "/my/local/IDs_file.tsv")
 Sys.setenv(output_folder = "/my/local/output/")
 ```
 
