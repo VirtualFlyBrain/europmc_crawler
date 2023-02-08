@@ -126,8 +126,8 @@ save_crawl_status <- function(crawling_status_file, year, month) {
 
 
 # Sys.setenv(FTP_folder = "https://ftp.flybase.net/flybase/associated_files/vfb/")
-Sys.setenv(IDs_file = "/home/huseyin/R_workspace2/europmc_crawler/data/pmcid_new_vfb_fb_2022_06_short.tsv")
-Sys.setenv(output_folder = "/home/huseyin/R_workspace2/europmc_crawler/data/output2/")
+# Sys.setenv(IDs_file = "/home/huseyin/R_workspace2/europmc_crawler/data/pmcid_new_vfb_fb_2022_06_short.tsv")
+# Sys.setenv(output_folder = "/home/huseyin/R_workspace2/europmc_crawler/data/output2/")
 
 today <- Sys.Date()
 year <- as.integer(format(today, "%Y"))
