@@ -11,6 +11,7 @@ crawl_pmcid <- function(pmcid, FBrf_ID, output_folder) {
   
   metadata <- pmc_metadata(doc)
   metadata['FBrf_ID'] <- c(FBrf_ID)
+  metadata['Title'] <- gsub("[\r\n]", "", toString(metadata['Title']))
   write.table(metadata, file= paste(output_folder, pmcid, "_metadata.tsv", sep=""), quote=FALSE, sep='\t', col.names = NA)
   
   captions <- pmc_caption(doc)
