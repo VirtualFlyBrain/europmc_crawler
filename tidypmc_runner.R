@@ -126,8 +126,8 @@ save_crawl_status <- function(crawling_status_file, year, month) {
 
 
 # Sys.setenv(FTP_folder = "https://ftp.flybase.net/flybase/associated_files/vfb/")
-# Sys.setenv(IDs_file = "/home/huseyin/R_workspace2/europmc_crawler/data/pmcid_new_vfb_fb_2022_06_short.tsv")
-# Sys.setenv(output_folder = "/home/huseyin/R_workspace2/europmc_crawler/data/output2/")
+Sys.setenv(IDs_file = "/home/huseyin/R_workspace2/europmc_crawler/data/pmcid_new_vfb_fb_2022_06_short.tsv")
+Sys.setenv(output_folder = "/home/huseyin/R_workspace2/europmc_crawler/data/output2/")
 
 today <- Sys.Date()
 year <- as.integer(format(today, "%Y"))
@@ -155,7 +155,8 @@ if ( !is.null(ftp_folder) & ftp_folder != '') {
 }
 
 if (!is.null(IDs_file)) {
-  target_folder <- paste0(output_folder, crawl_year, "_", str_pad(crawl_month, width=2, side="left", pad="0"), "/")
+  # target_folder <- paste0(output_folder, crawl_year, "_", str_pad(crawl_month, width=2, side="left", pad="0"), "/")
+  target_folder <- paste0(output_folder, "out", "/")
   crawl_articles(IDs_file, target_folder)
   save_crawl_status(crawling_status_file, year, month)
   print(paste0("Outputs are successfully written to ", target_folder))
