@@ -1,4 +1,4 @@
-FROM r-base
+FROM r-base:4.0.1
 
 ENV FTP_folder=https://ftp.flybase.net/flybase/associated_files/vfb/
 ENV output_folder=/data/output2/
