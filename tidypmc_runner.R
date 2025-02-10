@@ -68,13 +68,16 @@ get_previous_month <- function(year, month) {
 }
 
 download_latest_ids_file <- function(ftp_folder, status_file, current_year, current_month) {
+  # First, read the last crawl date
   if (file.exists(status_file)){
-    con = file(status_file, "r")
-    linn <-readLines(con)
+    con <- file(status_file, "r")
+    linn <- readLines(con)
+    last_crawl_year <- NA
+    last_crawl_month <- NA
     for (i in 1:length(linn)){
-      line = str_trim(linn[i])
-      if (length(line) > 0 & !startsWith(line, "#") & grepl('-', line, fixed = TRUE)) {
-        fields = strsplit(line, '-') [[1]]
+      line <- str_trim(linn[i])
+      if (nchar(line) > 0 & !startsWith(line, "#") & grepl('-', line, fixed = TRUE)) {
+        fields <- strsplit(line, '-')[[1]]
         last_crawl_year <- as.integer(fields[1])
         last_crawl_month <- as.integer(fields[2])
       }
@@ -86,37 +89,69 @@ download_latest_ids_file <- function(ftp_folder, status_file, current_year, curr
     last_crawl_month <- prev_date$month
   }
   
-  if(!endsWith(ftp_folder, "/")){
+  # Ensure ftp_folder has a trailing slash.
+  if (!endsWith(ftp_folder, "/")){
     ftp_folder <- paste0(ftp_folder,"/")
   }
   
-  # try next 6 months' files
+  # The next candidate to check is the month immediately following the last crawl.
   next_date <- get_next_month(last_crawl_year, last_crawl_month)
   test_year <- next_date$year
   test_month <- next_date$month
+  
   download_file <- NULL
-  crawl_year <- NULL
-  crawl_month <- NULL
-  for (i in 1:6) {
-    # https://ftp.flybase.net/flybase/associated_files/vfb/pmcid_new_vfb_fb_2022_06.tsv
-    url <- paste0(ftp_folder, "pmcid_new_vfb_fb_", test_year, "_", str_pad(test_month, width=2, side="left", pad="0"), ".tsv")
+  found <- FALSE
+  
+  # Define the allowed date as the previous month relative to the current system date.
+  allowed_date <- get_previous_month(current_year, current_month)
+  
+  i <- 1
+  while(i <= 6) {
+    # If the candidate month is beyond the allowed date, then stop further checking.
+    if ( (test_year > allowed_date$year) ||
+         (test_year == allowed_date$year && test_month > allowed_date$month) ) {
+      print("Candidate month is beyond the allowed previous month. Stopping search.")
+      break
+    }
+    
+    url <- paste0(ftp_folder, "pmcid_new_vfb_fb_", test_year, "_", 
+                  str_pad(test_month, width = 2, side = "left", pad = "0"), ".tsv")
     print(paste0("Trying url: ", url))
     hd <- httr::HEAD(url)
     status <- hd$all_headers[[1]]$status
     if (status == 200) {
-      download_file <- paste0(output_folder, "pmcid_new_vfb_fb_", test_year, "_", str_pad(test_month, width=2, side="left", pad="0"), ".tsv")
-      download.file(url, destfile=download_file, method="libcurl")
-      crawl_year <- test_year
-      crawl_month <- test_month
-      break
-    } else {
-      next_date <- get_next_month(test_year, test_month)
-      test_year <- next_date$year
-      test_month <- next_date$month
+      download_file <- paste0(output_folder, "pmcid_new_vfb_fb_", test_year, "_", 
+                              str_pad(test_month, width = 2, side = "left", pad = "0"), ".tsv")
+      download.file(url, destfile = download_file, method = "libcurl")
+      found <- TRUE
+      break  # Exit the loop after downloading the first available file
     }
+    # If the file is not available, move to the next month candidate.
+    next_date <- get_next_month(test_year, test_month)
+    test_year <- next_date$year
+    test_month <- next_date$month
+    i <- i + 1
   }
   
-  list(download_file=download_file, crawl_year=crawl_year, crawl_month=crawl_month)
+  # If no file was found and the candidate is still within the allowed range,
+  # update the crawl status so that next time the search starts from the next candidate.
+  if (!found) {
+    if ((test_year < allowed_date$year) || 
+        (test_year == allowed_date$year && test_month <= allowed_date$month)) {
+      last_crawl_year <- test_year
+      last_crawl_month <- test_month
+      print(paste0("No file downloaded. Updating crawl status to ", last_crawl_year, "-", last_crawl_month))
+    } else {
+      print("No file downloaded, but candidate month exceeds allowed date; crawl status remains unchanged.")
+    }
+  } else {
+    # If the file was downloaded, assume that month is now the latest crawl.
+    last_crawl_year <- test_year
+    last_crawl_month <- test_month
+    print(paste0("File downloaded for ", last_crawl_year, "-", last_crawl_month))
+  }
+  
+  return(list(download_file = download_file, crawl_year = last_crawl_year, crawl_month = last_crawl_month))
 }
 
 save_crawl_status <- function(crawling_status_file, year, month) {
@@ -156,12 +191,14 @@ if ( !is.null(ftp_folder) & ftp_folder != '') {
 }
 
 if (!is.null(IDs_file)) {
-  # target_folder <- paste0(output_folder, crawl_year, "_", str_pad(crawl_month, width=2, side="left", pad="0"), "/")
   target_folder <- paste0(output_folder, "out", "/")
   crawl_articles(IDs_file, target_folder)
-  save_crawl_status(crawling_status_file, year, month)
+  save_crawl_status(crawling_status_file, crawl_year, crawl_month)
   print(paste0("Outputs are successfully written to ", target_folder))
-}  
+} else if (!is.null(crawl_year) && !is.null(crawl_month)) {
+  save_crawl_status(crawling_status_file, crawl_year, crawl_month)
+  print("No new file found. Crawl status updated for next run.")
+}
 
 print("SUCCESS")
 
